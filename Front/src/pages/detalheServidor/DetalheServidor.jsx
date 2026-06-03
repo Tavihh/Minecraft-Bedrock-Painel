@@ -128,7 +128,7 @@ function DetalheServidor({id, container_id, render}) {
                             <h2>{sv.nome}</h2>
                         </div>
                         <div className="btn-acoes">
-                            {status.texto === 'online' || status.texto === 'ligando' || status.texto === 'criando' || status.texto === 'erro' ? (
+                            {['online', 'ligando', 'criando', 'erro'].includes(status.texto)?(
                                 <button className="action desligar" onClick={() => {power('desligar')}}>OFF</button>
                             ) : (
                                 <button className="action ligar" onClick={() => {power('ligar')}}>ON</button>
