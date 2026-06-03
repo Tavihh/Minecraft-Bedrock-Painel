@@ -1,0 +1,5 @@
+Back/node_modules
+Back/src/data/*
+Back/src/Maps/*
+Back/src/tmp/*
+Back/src/models/database.sqlite

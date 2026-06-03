@@ -1,0 +1,248 @@
+:root {
+  --ptero-bg: #0e0f14;
+  --ptero-panel: #1b1c23;
+  --ptero-border: #2d2e3a;
+  --ptero-blue: #3080d0;
+  --ptero-text: #eff1f5;
+  --ptero-muted: #8e929d;
+
+    --status-success: #4caf50;     
+    --status-success-hover: #388e3c;
+    --status-warning: #ffb300;     
+    --status-warning-hover: #ff9100;
+    --status-danger: #f44336;   
+    --status-danger-hover: #d32f2f;
+    --text-on-status: #ffffff;
+}
+
+.conteudo header {
+    display: flex;
+    max-width: 1000px;
+    width: 100%;
+    margin: auto;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0px;
+    & .titulo {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    & .btn-acoes {
+        display: flex;
+        gap: 5px;
+        & .action {
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            background-color: var(--ptero-panel);
+            padding: 5px;
+            border: 1px solid var(--ptero-border);
+            &.ligar {
+                background-color: var(--ptero-blue);
+            }
+            &.desligar {
+                background-color: var(--status-danger);
+                &hover {
+                    background-color: var(--status-danger-hover);
+                }
+            }
+            &:hover {
+                opacity: 0.7;
+                background-color: var(--ptero-border);
+            }
+        }
+        & .del {
+            background-color: var(--status-danger);
+            &:hover {
+                background-color: var(--status-danger-hover);
+            }
+        }
+    }
+
+}
+
+.conteudo .infos {
+    display: grid;
+    margin: auto;
+    grid-template-columns: auto auto auto;
+    max-width: 1000px;
+    gap: 10px;
+    
+
+    & .info {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+        border: 1px solid var(--ptero-border);
+        background-color: var(--ptero-panel);
+        border-radius: 5px;
+        padding: 5px;
+        font-weight: 600;
+        margin-bottom: 10px;
+
+        & div {
+            display: flex;
+            flex-direction: column;
+        }
+    }
+}
+
+.conteudo .console-container {
+    display: grid;
+    grid-template-columns: auto;
+    max-width: 1000px;
+    margin: auto;
+    border: 1px solid var(--ptero-border);
+    background-color: var(--ptero-panel);
+    border-radius: 10px;
+    overflow: hidden;
+    color: var(--ptero-text);
+    margin-bottom: 10px;
+
+    & .console-header {
+        padding: 5px;
+        background-color: var(--ptero-muted);
+        font-weight: 600;
+        color: black;
+    }
+    
+    & .console-box {
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        background-color: black;
+        max-height: 300px;
+        min-height: 300px;
+        height: 100%;
+        overflow: auto;
+        scrollbar-width: none;
+
+        & p {
+            font-size: 0.7em
+        }
+    }
+
+    & .console-input {
+        display: flex;
+        gap: 5px;
+        padding: 5px;
+
+        & input {
+            width: 100%;
+            background-color: transparent;
+            border: 0px;
+            outline: none;
+            color: var(--ptero-text);
+        }
+    }
+}
+
+.conteudo .map-container {
+    display: grid;
+    grid-template-columns: auto;
+    max-width: 1000px;
+    margin: auto;
+    border: 1px solid var(--ptero-border);
+    background-color: var(--ptero-panel);
+    border-radius: 10px;
+    overflow: hidden;
+    color: var(--ptero-text);
+    margin-bottom: 10px;
+
+    & .map-header {
+        display: flex;
+        align-items: start;
+        gap: 10px;
+        padding: 5px;
+        background-color: var(--ptero-muted);
+        font-weight: 600;
+        color: black;
+
+        & button {
+            background-color: transparent;
+            color: white;
+            border: 0px;
+            padding: 2px;
+            border-radius: 5px;
+            cursor: pointer;
+
+            &:hover {
+                background-color: var(--ptero-border);
+            }
+        }
+    }
+    
+    & .map-box {
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        height: max-content;
+        overflow: auto;
+        scrollbar-width: none;
+
+        & p {
+            font-size: 0.7em
+        }
+    }
+}
+
+.conteudo .jogadores-container {
+    display: grid;
+    grid-template-columns: auto;
+    max-width: 1000px;
+    margin: auto;
+    border: 1px solid var(--ptero-border);
+    background-color: var(--ptero-panel);
+    border-radius: 10px;
+    overflow: hidden;
+    color: var(--ptero-text);
+
+    & .jogadores-header {
+        display: flex;
+        align-items: start;
+        gap: 10px;
+        padding: 5px;
+        background-color: var(--ptero-muted);
+        font-weight: 600;
+        color: black;
+
+        & button {
+            background-color: transparent;
+            color: white;
+            border: 0px;
+            padding: 2px;
+            border-radius: 5px;
+            cursor: pointer;
+
+            &:hover {
+                background-color: var(--ptero-border);
+            }
+        }
+    }
+    
+    & .jogadores-box {
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        height: max-content;
+        overflow: auto;
+        scrollbar-width: none;
+
+        & p {
+            font-size: 0.7em
+
+        }
+
+        & .player-row {
+            display: flex;
+            gap: 10px;
+
+            & .online {
+                color: var(--status-success);
+            }
+        }
+
+    }
+}

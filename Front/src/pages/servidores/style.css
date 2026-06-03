@@ -1,0 +1,121 @@
+:root {
+  --ptero-bg: #0e0f14;
+  --ptero-panel: #1b1c23;
+  --ptero-border: #2d2e3a;
+  --ptero-blue: #3080d0;
+  --ptero-text: #eff1f5;
+  --ptero-muted: #8e929d;
+
+    --status-success: #4caf50;     
+    --status-success-hover: #388e3c;
+    --status-warning: #ffb300;     
+    --status-warning-hover: #ff9100;
+    --status-danger: #f44336;   
+    --status-danger-hover: #d32f2f;
+    --text-on-status: #ffffff;
+}
+
+.servidores-list {
+    display: flex;
+    max-width: 1000px;
+    width: 100%;
+    margin: auto;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 0px;
+    overflow: auto;
+}
+
+/* CADA LINHA DA LISTA */
+.list-item-server {
+    background-color: #1e1e24;
+    border: 1px solid #2d2d35;
+    border-radius: 8px;
+    gap: 20px;
+    width: 100%;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+}
+
+.list-item-server:hover {
+    background-color: #24242c;
+    border-color: #4a4a5a;
+}
+
+/* COLUNA PRINCIPAL: Ícone e Nome */
+.list-col-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 2; /* Ocupa mais espaço na linha */
+}
+
+.icon-server {
+    background-color: #2b2b36;
+    padding: 6px;
+    border-radius: 6px;
+}
+
+.server-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.server-title {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.server-subtext {
+    color: #8a8a9e;
+    font-size: 0.8rem;
+}
+
+/* COLUNAS SECUNDÁRIAS: Informações e Porta */
+.list-col-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    justify-content: center;
+}
+
+.info-label {
+    color: #8a8a9e;
+    font-size: 0.85rem;
+}
+
+.info-value {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.font-mono {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #2b2b36;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+/* COLUNA DE STATUS: Alinha a badge na direita */
+.list-col-status {
+    display: flex;
+    justify-content: flex-end;
+    flex: 1;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
