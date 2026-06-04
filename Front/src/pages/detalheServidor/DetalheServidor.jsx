@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react"
 import api from "../../utils/api"
 import './style.css'
 import Servidores from "../servidores/Servidores"
+import EditaServidor from "../editaServidor/EditaServidor"
 import MapaInterativo from "../mapaInterativo/MapaInterativo"
 
 function DetalheServidor({id, container_id, render}) {
@@ -87,6 +88,7 @@ function DetalheServidor({id, container_id, render}) {
     const download = () => window.open(`http://localhost:3000/servidores/download/${id}`);
     const deletar = () => window.confirm("Deseja excluir permanentemente?") && api.delete(`/servidores/deletar/${sv.id}`).then(render(<Servidores render={render}/>, 'Servidores')).catch((err) => {setErros(err.response?.data || ['Erro'])});
     const voltar = () => {render(<Servidores render={render}/>, 'Servidores')}
+    const edit = () => {render(<EditaServidor id={id} container_id={container_id} render={render}/>, `Editar ${sv.nome}`)}
 
     useEffect(() => {
         getServers()
@@ -128,11 +130,13 @@ function DetalheServidor({id, container_id, render}) {
                             <h2>{sv.nome}</h2>
                         </div>
                         <div className="btn-acoes">
-                            {['online', 'ligando', 'criando', 'erro'].includes(status.texto)?(
+                            {status.texto.toLowerCase() === 'online' || status.texto.toLowerCase() === 'ligando...' || status.texto.toLowerCase() === 'criando...' || status.texto.toLowerCase() === 'erro'?(
                                 <button className="action desligar" onClick={() => {power('desligar')}}>OFF</button>
                             ) : (
                                 <button className="action ligar" onClick={() => {power('ligar')}}>ON</button>
                             )}
+                            
+                            <button className="btn action ligar" onClick={edit}><span className="material-icons"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg></span></button>
                             <button className="btn" onClick={download}><span className="material-icons"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/></svg></span></button>
                             <button className="btn del" onClick={deletar}><span className="material-icons"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg></span></button>
                         </div>

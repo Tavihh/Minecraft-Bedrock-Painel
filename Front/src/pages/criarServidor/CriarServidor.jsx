@@ -4,22 +4,32 @@ import './style.css'
 
 function CriarServidor() {
     const [formData, setFormData] = useState({
-        nome: '', // (Opcional)
-        descricao: '', // (Opcional)
-        porta_host: 19132, // (Opcional)
-        versao: 'latest', // Valor padrão de exemplo
-        nivel_permissao: 'member', // visitor, member, operator
-        tipo_mundo: 'DEFAULT', // FLAT, LEGACY, DEFAULT
-        gamemode: 'survival', // survival, creative
-        cheats: false, // true ou false
-        cordenadas: true, // true ou false
-        dias_jogados: true, // true ou false
-        force_gamemode: false, // true ou false
-        desempenho: 'leve', //leve, medio, alto
-        max_players: 10, // Valor padrão de exemplo
+        // Configurações e Identificadores do Painel
+        nome: null, 
+        descricao: null, 
+        server_port: '19132', // Antiga porta_host (como string, conforme seu Model)
+        desempenho: 'medio', // leve, medio, alto
+
+        // Propriedades Internas do Minecraft (server.properties)
+        server_name: null, // Nome exibido in-game (Obrigatorio no seu Model)
+        level_seed: null, // Antiga seed (Iniciado como string vazia em vez de undefined)
+        max_players: '10', // Mantido o padrão (como string, conforme seu Model)
+        player_idle_timeout: '30', // Tempo limite AFK (Opcional)
+        version: 'latest', // Antiga versao
         difficulty: 'normal', // peaceful, easy, normal, hard
-        seed: undefined // Valor padrão de exemplo (Opicional)
-    })
+        level_type: 'DEFAULT', // Antigo tipo_mundo (DEFAULT, FLAT, LEGACY)
+        default_player_permission_level: 'member', // Antigo nivel_permissao (visitor, member, operator)
+
+        // Regras de Jogo (Lembre-se que no banco são ENUMs 'true'/'false')
+        gamemode: 'survival', // survival, creative, adventure
+        allow_cheats: 'false', // Antigo cheats (Iniciado como string para casar com o ENUM)
+        force_gamemode: 'false', // Iniciado como string
+        cordenadas: 'true', // Iniciado como string
+        dias_jogados: 'true', // Iniciado como string
+        online_mode: 'false', // Autenticação Xbox Live (Iniciado como string)
+        allow_list: 'false', // Whitelist (Iniciado como string)
+        texturepack_required: 'false'
+    });
 
     const [pronto, setPronto] = useState(false)
     const [erros, setErros] = useState([])
@@ -59,7 +69,7 @@ function CriarServidor() {
         setSuccess([])
 
         const data = new FormData(formRef.current)
-        data.set('cheats', formRef.current.cheats.checked)
+        data.set('allow_cheats', formRef.current.allow_cheats.checked)
         data.set('cordenadas', formRef.current.cordenadas.checked)
         data.set('dias_jogados', formRef.current.dias_jogados.checked)
         data.set('force_gamemode', formRef.current.force_gamemode.checked)
@@ -89,65 +99,99 @@ function CriarServidor() {
             ))}
             <form className='container-form' ref={formRef} onSubmit={handleSubmit}>
                 {/* Nome */}
-                <label>Dados do Servidor:</label>
-                <input type="text" name="nome" defaultValue={formData.nome} required placeholder="Nome do Servidor"/>
+                <label htmlFor="nome">Nome: </label>
+                <input type="text" name="nome" defaultValue={formData.nome} required placeholder="Nome do Servidor (Painel)"/>
+            
+                <label htmlFor="descricao">Descrição: </label>
                 <textarea name="descricao" defaultValue={formData.descricao} placeholder="Descrição do Servidor (Opcional)"/>
-                <input type="number" name="porta_host" defaultValue={formData.porta_host} placeholder="Porta do Host (Opcional)"/>
-                <input type="number" name="seed" defaultValue={formData.seed} placeholder="Seed do Mundo (Opcional)"/>
+            
+                <label htmlFor="server_port">Porta: </label>
+                <input type="number" name="server_port" defaultValue={formData.server_port} required placeholder="Porta do Host (Ex: 19132)"/>
+            
+                <label htmlFor="level_seed">Seed: </label>
+                <input type="text" name="level_seed" defaultValue={formData.level_seed} placeholder="Seed do Mundo (Opcional)"/>
+            
+                <label htmlFor="max_players">Max Jogadores: </label>
                 <input type="number" name="max_players" defaultValue={formData.max_players} placeholder="Máximo de Players"/>
+            
+                <label htmlFor="player_idle_timeout">Expulsar Jogadores Inativos após (min)</label>
+                <input type="number" name="player_idle_timeout" defaultValue={formData.player_idle_timeout} placeholder="Tempo Limite AFK (Minutos - Opcional)"/>
+                            
+                <label>Nome do Servidor (No Jogo):</label>
+                <input type="text" name="server_name" defaultValue={formData.server_name} placeholder="Nome Exibido In-Game (Opcional)"/>
+
                 <label>Versão:</label>
-                <select name="versao" id="versao" defaultValue={formData.versao} required>
+                <select name="version" id="version" defaultValue={formData.version} required>
                     <option value="latest">Latest</option>
                     {versoes.length > 0 ? versoes.map((v, i) => (
                         <option value={v} key={i}>{v}</option>
                     )) : ''}
                 </select>
-                <label>Difficultade:</label>
+
+                <label>Dificuldade:</label>
                 <select name="difficulty" defaultValue={formData.difficulty}>
-                    <option value="peaceful">Peaceful</option>
-                    <option value="easy">Easy</option>
+                    <option value="peaceful">Pacífico</option>
+                    <option value="easy">Fácil</option>
                     <option value="normal">Normal</option>
-                    <option value="hard">Hard</option>
+                    <option value="hard">Dificil</option>
                 </select>
+
                 <label>Modo de Jogo:</label>
                 <select name="gamemode" defaultValue={formData.gamemode}>
-                    <option value="survival">Survival</option>
-                    <option value="creative">Creative</option>
+                    <option value="survival">Sobrevivencia</option>
+                    <option value="creative" style={{ color: '#ff3333', fontWeight: 'bold' }}>Criativo</option>
+                    <option value="adventure">Aventura</option>
                 </select>
+
                 <label>Desempenho:</label>
                 <select name="desempenho" defaultValue={formData.desempenho}>
                     <option value="leve">Leve</option>
                     <option value="medio">Médio</option>
                     <option value="alto">Alto</option>
                 </select>
+
                 <label>Tipo de Mundo:</label>
-                <select name="tipo_mundo" defaultValue={formData.tipo_mundo}>
-                    <option value="default">Default</option>
-                    <option value="flat">Flat</option>
-                    <option value="legacy">Legacy</option>
+                <select name="level_type" defaultValue={formData.level_type}>
+                    <option value="DEFAULT">Padrão</option>
+                    <option value="FLAT">Plano</option>
+                    <option value="LEGACY">Antigo</option>
                 </select>
+
                 <label>Nível de Permissão:</label>
-                <select name="nivel_permissao" defaultValue={formData.nivel_permissao}>
-                    <option value="visitor">Visitor</option>
-                    <option value="member">Member</option>
-                    <option value="operator">Operator</option>
+                <select name="default_player_permission_level" defaultValue={formData.default_player_permission_level}>
+                    <option value="visitor">Visitante</option>
+                    <option value="member">Membro</option>
+                    <option value="operator">Operador</option>
                 </select>
+
                 <div className="checkbox">
                     <label>
-                        <input type="checkbox" name="cheats" defaultChecked={formData.cheats} />
-                        Permitir Cheats
-                    </label>
-                    <label>
-                        <input type="checkbox" name="cordenadas" defaultChecked={formData.cordenadas} />
+                        <input type="checkbox" name="cordenadas" defaultChecked={formData.cordenadas === 'true'} />
                         Exibir Coordenadas
                     </label>
                     <label>
-                        <input type="checkbox" name="dias_jogados" defaultChecked={formData.dias_jogados} />
-                        Contar Dias Jogados
+                        <input type="checkbox" name="dias_jogados" defaultChecked={formData.dias_jogados === 'true'} />
+                        Exibir Dias Jogados
                     </label>
                     <label>
-                        <input type="checkbox" name="force_gamemode" defaultChecked={formData.force_gamemode} />
+                        <input type="checkbox" name="force_gamemode" defaultChecked={formData.force_gamemode === 'true'} />
                         Forçar Modo de Jogo
+                    </label>
+                    <label>
+                        <input type="checkbox" name="online_mode" defaultChecked={formData.online_mode === 'true'} />
+                        Apenas Contas Xbox
+                    </label>
+                    <label>
+                        <input type="checkbox" name="allow_list" defaultChecked={formData.allow_list === 'true'} />
+                        Ativar Whitelist 
+                    </label>
+                    <label>
+                        <input type="checkbox" name="texturepack_required" defaultChecked={formData.texturepack_required === 'true'} />
+                        Pacotes de Textura
+                    </label>
+                    <label style={{ color: '#ff3333', fontWeight: 'bold' }}>
+                        <input type="checkbox" name="allow_cheats" defaultChecked={formData.allow_cheats === 'true'} />
+                        Permitir Cheats
                     </label>
                 </div>
                 <label htmlFor="arquivo_mundo" className={`upload ${arquivo? 'arquivo-mundo-uploaded' : ''}`}>{arquivo ? `📄 (${arquivo.name})` : 'Upload do Mundo (Opcional)'}</label>

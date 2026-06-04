@@ -133,10 +133,11 @@ form.container-form {
   }
 
   & div.checkbox {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 2fr));
+    width: 100%;
     height: min-content;
-    flex-wrap: wrap;
+    padding: 0px 5px;
     gap: 10px;
 
     & input, label {

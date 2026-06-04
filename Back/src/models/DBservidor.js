@@ -4,11 +4,18 @@ const sq = require('./DBconfig')
 
 // definindo db
 const DBservidor = sq.define('servidores', {
+    // Configuracoes
     nome: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
     },
+    descricao: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
+    // Sensiveis
     nome_diretorio: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -23,17 +30,87 @@ const DBservidor = sq.define('servidores', {
         allowNull: false,
         unique: true
     },
-    descricao: {
+    path_db: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    // desativa conquistas
+    allow_cheats: {
+        type: DataTypes.ENUM('true', 'false'),
+        allowNull: false,
+    },
+    gamemode: {
+        type: DataTypes.ENUM('survival', 'creative', 'adventure'),
+        allowNull: false,
+    },
+    // customizacoes do mundo
+    force_gamemode: {
+        type: DataTypes.ENUM('true', 'false'),
+        allowNull: false,
+    },
+    version: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    level_type: {
+        type: DataTypes.ENUM('DEFAULT', 'FLAT', 'LEGACY'),
+        allowNull: false,
+    },
+    difficulty: {
+        type: DataTypes.ENUM('peaceful', 'easy', 'normal', 'hard'),
+        allowNull: false,
+    },
+    server_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
+    level_seed: {
         type: DataTypes.STRING,
         allowNull: true
     },
-    versao: {
+    max_players: {
         type: DataTypes.STRING,
-        defaultValue: 'latest',
+        allowNull: true
+    },
+    desempenho: {
+        type: DataTypes.ENUM('leve', 'medio', 'alto'),
+        allowNull: false,
+    },
+    cordenadas: {
+        type: DataTypes.ENUM('true', 'false'),
+        allowNull: false,
+    },
+    dias_jogados: {
+        type: DataTypes.ENUM('true', 'false'),
+        allowNull: false,
+    },
+    default_player_permission_level: {
+        type: DataTypes.ENUM('visitor', 'member', 'operator'),
+        allowNull: false,
+    },
+    online_mode: {
+        type: DataTypes.ENUM('true', 'false'),
+        allowNull: false,
+    },
+    allow_list: {
+        type: DataTypes.ENUM('true', 'false'),
+        allowNull: false,
+    },
+    player_idle_timeout: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    server_port: {
+        type: DataTypes.STRING,
         allowNull: false
     },
+    server_portv6: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     ram_maxima: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         defaultValue: 2,
         allowNull: false
     },
@@ -45,99 +122,53 @@ const DBservidor = sq.define('servidores', {
         type: DataTypes.ENUM('criando', 'ligando', 'online', 'offline', 'erro'),
         defaultValue: 'offline'
     },
-    path_db: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    imagem_mapa: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    nivel_permissao: {
-        type: DataTypes.ENUM('visitor', 'member', 'operator'),
-        defaultValue: 'member'
-    },
-    tipo_mundo: {
-        type: DataTypes.ENUM('flat', 'legacy', 'default'),
-        defaultValue: 'default'
-    },
-    porta_host: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        unique: true
-    },
-    gamemode: {
-        type: DataTypes.ENUM('survival', 'creative'),
-        allowNull: false,
-        defaultValue: 'survival'
-    },
-    cheats: {
-        type: DataTypes.ENUM('true', 'false'),
-        allowNull: false
-    },
-    cordenadas: {
-        type: DataTypes.ENUM('true', 'false'),
-        allowNull: false
-    },
-    dias_jogados: {
-        type: DataTypes.ENUM('true', 'false'),
-        allowNull: false
-    },
-    desempenho: {
-        type: DataTypes.ENUM('leve', 'medio', 'alto'),
-        allowNull: false,
-        defaultValue: 'medio'
-    },
     view_distance: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    simulation_distance: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    max_players: {
         type: DataTypes.STRING,
-        allowNull: false,
-        defaultValue: 1
+        allowNull: false
     },
-    difficulty: {
-        type: DataTypes.ENUM('peaceful', 'easy', 'normal', 'hard'),
-        allowNull: false,
-        defaultValue: 'normal'
+    tick_distance: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
-    force_gamemode: {
+    texturepack_required: {
         type: DataTypes.ENUM('true', 'false'),
-        allowNull: false
+        allowNull: false,
     },
-    seed: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    }
 });
 
 // hooks
-DBservidor.beforeValidate( async (servidor) => {
-    if(!servidor.porta_host) {
-        try{
-            const maxPort = await DBservidor.max('porta_host');
-            servidor.porta_host = maxPort ? Number(maxPort + 1) : 19132;
+DBservidor.beforeValidate(async (servidor) => {
+    if (!servidor.isNewRecord && !servidor.changed('server_port')) {
+        return; 
+    }
+
+    // 🚀 SEGREDO 2: Atualizado de 'porta_host' para 'server_port' conforme seu novo Model
+    if (!servidor.server_port) {
+        try {
+            const maxPort = await DBservidor.max('server_port');
+            // Como no banco é STRING, garantimos que grava como String, mas soma como Number
+            servidor.server_port = maxPort ? String(Number(maxPort) + 1) : '19132';
+            servidor.server_portv6 = servidor.server_port; // Sincroniza a v6 junto
         } catch (error) {
-            console.log('Erro no Hook de porta:', error);
+            console.log('Erro no Hook de porta (geração):', error);
         }
     } else {
         try {
-            const portaExiste = await DBservidor.findOne({where: {porta_host: Number(servidor.porta_host)}})
-            if(portaExiste) {
-                const maxPort = await DBservidor.max('porta_host');
-                servidor.porta_host = maxPort ? Number(maxPort + 1) : 19132;
+            // Garante que a busca seja feita usando o valor atual como String
+            const portaExiste = await DBservidor.findOne({ 
+                where: { server_port: String(servidor.server_port) } 
+            });
+            
+            if (portaExiste && portaExiste.id !== servidor.id) {
+                const maxPort = await DBservidor.max('server_port');
+                servidor.server_port = maxPort ? String(Number(maxPort) + 1) : '19132';
+                servidor.server_portv6 = servidor.server_port; // Sincroniza a v6 junto
             }
         } catch (error) {
-            console.log('Erro no Hook de porta:', error);
+            console.log('Erro no Hook de porta (validação):', error);
         }   
     }
-})
+});
 
 // exportações
 module.exports = DBservidor;

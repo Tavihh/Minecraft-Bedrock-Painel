@@ -14,7 +14,7 @@ function Home() {
         setMenuAtivo(!menuAtivo);
     }
 
-    const [menuAtivo, setMenuAtivo] = useState(false);
+    const [menuAtivo, setMenuAtivo] = useState(true);
     const [abaAtiva, setAbaAtiva] = useState({
         page: <Servidores render={render}/>,
         titulo: 'Servidores'
