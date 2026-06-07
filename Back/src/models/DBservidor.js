@@ -12,8 +12,7 @@ const DBservidor = sq.define('servidores', {
     },
     descricao: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: true,
     },
     // Sensiveis
     nome_diretorio: {

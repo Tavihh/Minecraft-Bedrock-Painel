@@ -119,15 +119,17 @@ function DetalheServidor({id, container_id, render}) {
                     <header>
                         <div className="titulo">
                             <button onClick={voltar} className="btn"><span className="material-icons"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg></span></button>
-                            <div className="list-col-status">
-                                <div className="status-badge" style={{ backgroundColor: `${status.cor}15`, color: status.cor }}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill={status.cor}>
-                                        <path d="M480-280q83 0 141.5-58.5T680-480q0-83-58.5-141.5T480-680q-83 0-141.5 58.5T280-480q0 83 58.5 141.5T480-280Z"/>
-                                    </svg>
-                                    <span>{status.texto}</span>
+                            <div className="titulo-status">
+                                <h2>{sv.nome}</h2>
+                                <div className="list-col-status">
+                                    <div className="status-badge" style={{ backgroundColor: `${status.cor}15`, color: status.cor }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill={status.cor}>
+                                            <path d="M480-280q83 0 141.5-58.5T680-480q0-83-58.5-141.5T480-680q-83 0-141.5 58.5T280-480q0 83 58.5 141.5T480-280Z"/>
+                                        </svg>
+                                        <span>{status.texto}</span>
+                                    </div>
                                 </div>
                             </div>
-                            <h2>{sv.nome}</h2>
                         </div>
                         <div className="btn-acoes">
                             {status.texto.toLowerCase() === 'online' || status.texto.toLowerCase() === 'ligando...' || status.texto.toLowerCase() === 'criando...' || status.texto.toLowerCase() === 'erro'?(
@@ -146,7 +148,7 @@ function DetalheServidor({id, container_id, render}) {
                     <div className="infos">
                         <div className="info">
                             <span className="material-icons"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="m680-240-56-56 182-184-182-184 56-56 240 240-240 240Zm-400 0L40-480l240-240 56 56-182 184 182 184-56 56Zm11.5-211.5Q280-463 280-480t11.5-28.5Q303-520 320-520t28.5 11.5Q360-497 360-480t-11.5 28.5Q337-440 320-440t-28.5-11.5Zm160 0Q440-463 440-480t11.5-28.5Q463-520 480-520t28.5 11.5Q520-497 520-480t-11.5 28.5Q497-440 480-440t-28.5-11.5Zm160 0Q600-463 600-480t11.5-28.5Q623-520 640-520t28.5 11.5Q680-497 680-480t-11.5 28.5Q657-440 640-440t-28.5-11.5Z"/></svg></span>
-                            <div className="tile-txt">Porta<span>{sv.porta_host}</span></div>
+                            <div className="tile-txt">Porta<span>{sv.server_port}</span></div>
                         </div>
                         <div className="info">
                             <span className="material-icons"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="M360-360v-240h240v240H360Zm80-80h80v-80h-80v80Zm-80 320v-80h-80q-33 0-56.5-23.5T200-280v-80h-80v-80h80v-80h-80v-80h80v-80q0-33 23.5-56.5T280-760h80v-80h80v80h80v-80h80v80h80q33 0 56.5 23.5T760-680v80h80v80h-80v80h80v80h-80v80q0 33-23.5 56.5T680-200h-80v80h-80v-80h-80v80h-80Zm320-160v-400H280v400h400ZM480-480Z"/></svg></span>

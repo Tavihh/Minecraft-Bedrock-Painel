@@ -32,7 +32,7 @@ function Jogadores() {
             {!pronto && (<div className='alert warning'>Carregando...</div>)}
             {erros.map((e, index) => (<div key={index} className="alert danger">{e}</div>))}
             {pronto && jogadores.length == 0 && (
-                <div className="alert warning">Nenhum Servidor</div>
+                <div className="alert warning">Nenhum Jogador</div>
             )}
 
             <div className="jogadores-list">

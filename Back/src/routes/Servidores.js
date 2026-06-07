@@ -15,7 +15,6 @@ const DBjogador = require('../models/DBjogador')
 const getLanIp = require('../utils/getLanIp')
 const renderizaMapa = require('../utils/renderizaMapa')
 
-
 // rotas
 router.get('/', ( req, res ) => {
     return res.status(200).json(['Rota Servidores Funcionando!'])
@@ -141,6 +140,11 @@ router.post('/criar', upload.single('arquivo_mundo'), async(req, res) => {
     } catch (err) {
         if(fs.existsSync(PathDestino)) fs.removeSync(PathDestino)
         erros.push('Não foi possivel salvar o servidor')
+        if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
+            console.log('🔴 ERRO DE VALIDAÇÃO DETALHADO:', err.errors.map(e => e.message));
+        } else {
+            console.log('🔴 OUTRO ERRO NO BANCO:', err);
+        }
         erros.push(err.message)
         return res.status(400).json(erros)
     }
@@ -165,7 +169,6 @@ router.post('/criar', upload.single('arquivo_mundo'), async(req, res) => {
                 `ONLINE_MODE=${sv.online_mode}`,
                 `ALLOW_LIST=${sv.allow_list}`,
                 `SERVER_PORT=${sv.server_port}`,
-                `SERVER_PORT_V6=${sv.server_portv6}`,
                 `VIEW_DISTANCE=${sv.view_distance}`,
                 `SIMULATION_DISTANCE=${sv.tick_distance}`,
                 `PLAYER_IDLE_TIMEOUT=${sv.player_idle_timeout}`,
@@ -178,8 +181,7 @@ router.post('/criar', upload.single('arquivo_mundo'), async(req, res) => {
             ],
             HostConfig: {
                 PortBindings: {
-                    [`${String(server_port)}/udp`]: [{ HostIp: '0.0.0.0', HostPort: String(server_port) }],
-                    [`${String(server_port)}/tcp`]: [{ HostIp: '0.0.0.0', HostPort: String(server_port) }]
+                    [`${String(sv.server_port)}/udp`]: [{ HostIp: '0.0.0.0', HostPort: String(sv.server_port) }],
                 },
                 Binds: [
                     `${path.resolve(PathDestino)}:/data`,
@@ -398,11 +400,16 @@ router.put('/editar/:id', async (req, res) => {
     if(desempenho == 'leve') {[view_distance, tick_distance, ram_maxima] = [6, 4, 2]}
     else if(desempenho == 'medio') {[view_distance, tick_distance, ram_maxima] = [10, 4, 4]}
     else if(desempenho == 'alto') {[view_distance, tick_distance, ram_maxima] = [16, 8, 6]}
+    else {[view_distance, tick_distance, ram_maxima] = [10, 4, 4]}
     
     // Atualiza o DB
     let sv
     try{
         sv = await DBservidor.findByPk(id)
+        if (!sv) {
+            erros.push('Servidor não encontrado!')
+            return res.status(404).json(erros)
+        }
         await sv.update({
             // Configuracoes
             nome: String(nome),
@@ -421,59 +428,80 @@ router.put('/editar/:id', async (req, res) => {
             online_mode: String(online_mode),
             allow_list: String(allow_list),
             player_idle_timeout: String(player_idle_timeout),
-            texturepack_required: String(texturepack_required)
+            texturepack_required: String(texturepack_required),
+            desempenho: String(desempenho) || 'medio',
+            view_distance: String(view_distance),
+            tick_distance: String(tick_distance),
+            ram_maxima: String(ram_maxima)
         })
     } catch (err) {
         erros.push('Não foi possivel editar o banco de dados')
         erros.push(err.message)
+        console.log(err)
         return res.status(400).json(erros)
     }
-    // Atualiza Server.properties
+
+    //Apaga o antigo container
+    const containerAntigo = docker.getContainer(sv.container_id);
     try {
-        const pathProperties = path.join(sv.path_diretorio, 'server.properties');
-        if (fs.existsSync(pathProperties)) {
-            let conteudo = fs.readFileSync(pathProperties, 'utf-8');
+        await containerAntigo.stop({ t: 15 });
+        await containerAntigo.remove();
+    } catch (e) {
+        console.log("Container já estava parado ou não existia");
+    }
 
-            const atualizarLinha = (chave, valor) => {
-                const chaveUpper = String(chave).toUpperCase();
-                const regex = new RegExp(`^${chaveUpper}=.*$`, 'm');
-                if (regex.test(conteudo)) {
-                    conteudo = conteudo.replace(regex, `${chaveUpper}=${valor}`);
-                } else {
-                    conteudo += `\n${chaveUpper}=${valor}`;
-                }
-            };
-
-            atualizarLinha('server-name', sv.server_name);
-            atualizarLinha('gamemode', sv.gamemode);
-            atualizarLinha('force-gamemode', sv.force_gamemode);
-            atualizarLinha('difficulty', sv.difficulty);
-            atualizarLinha('allow-cheats', sv.allow_cheats);
-            atualizarLinha('max-players', sv.max_players);
-            atualizarLinha('online-mode', sv.online_mode);
-            atualizarLinha('allow-list', sv.allow_list);
-            atualizarLinha('player-idle-timeout', sv.player_idle_timeout);
-            atualizarLinha('texturepack-required', sv.texturepack_required);
-            
-            // Regras especiais do array GAMERULES que vão para linhas separadas no properties nativo
-            atualizarLinha('showcoordinates', sv.cordenadas);
-            atualizarLinha('showdaysplayed', sv.dias_jogados);
-
-            fs.writeFileSync(pathProperties, conteudo, 'utf8');
-        }
-        
-
+    // Recria o container
+    let container
+    try {
+        container = await docker.createContainer({
+            Image: `itzg/minecraft-bedrock-server`,
+            name: `${sv.nome_diretorio}`,
+            Tty: true,
+            OpenStdin: true,
+            Env: [
+                'EULA=TRUE',
+                `GAMERULES=showCoordinates=${sv.cordenadas},showDaysPlayed=${sv.dias_jogados}`,
+                `SERVER_NAME=${sv.server_name}`,
+                `GAMEMODE=${sv.gamemode}`,
+                `FORCE_GAMEMODE=${sv.force_gamemode}`,
+                `DIFFICULTY=${sv.difficulty}`,
+                `ALLOW_CHEATS=${sv.allow_cheats}`,
+                `MAX_PLAYERS=${sv.max_players}`,
+                `ONLINE_MODE=${sv.online_mode}`,
+                `ALLOW_LIST=${sv.allow_list}`,
+                `SERVER_PORT=${sv.server_port}`,
+                `VIEW_DISTANCE=${sv.view_distance}`,
+                `SIMULATION_DISTANCE=${sv.tick_distance}`,
+                `PLAYER_IDLE_TIMEOUT=${sv.player_idle_timeout}`,
+                `LEVEL_SEED=${sv.level_seed}`,
+                `DEFAULT_PLAYER_PERMISSION_LEVEL=${sv.default_player_permission_level}`,
+                `TEXTUREPACK_REQUIRED=${sv.texturepack_required}`,
+                `LEVEL_TYPE=${sv.level_type}`,
+                `VERSION=${sv.version}`,
+                `MEMORY=${sv.ram_maxima}G`
+            ],
+            HostConfig: {
+                PortBindings: {
+                    [`${String(sv.server_port)}/udp`]: [{ HostIp: '0.0.0.0', HostPort: String(sv.server_port) }],
+                },
+                Binds: [
+                    `${path.resolve(sv.path_diretorio)}:/data`,
+                ],
+                // Mantém apenas o limite de RAM para o Windows não engolir sua máquina
+                Memory: Number(sv.ram_maxima) * 1024 * 1024 * 1024
+            }
+        })
+        await sv.update({container_id: container.id, status: 'criando'});
     } catch (err) {
-        erros.push('Não foi possivel editar o container')
+        erros.push('Não foi possivel inicializar o container do Docker')
         erros.push(err.message)
         return res.status(400).json(erros)
     }
 
+    // ligando container/servidor
     try {
-        // ligando container/servidor
-        const container = docker.getContainer(sv.container_id);
-        await container.restart
-        await sv.update({ status: 'offline'})
+        await container.start();
+        await sv.update({ status: 'ligando'})
         return res.status(201).json(['Servidor de Minecraft Bedrock Atualizado!'])
     } catch (err) {
         await sv.update({status: 'erro'})

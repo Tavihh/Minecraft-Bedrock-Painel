@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import api from '../../utils/api'
-import DetalheServidor from '../detalheServidor/DetalheServidor'
+import Servidores from '../servidores/Servidores'
 import './style.css'
 
 function EditaServidor({ id, container_id, render }) {
@@ -9,17 +9,21 @@ function EditaServidor({ id, container_id, render }) {
     const [success, setSuccess] = useState([])
     const formRef = useRef(null)
     const [formData, setFormData] = useState(null); // Iniciado como null para controle de renderização
+    const [isXboxOnly, setIsXboxOnly] = useState(false);
+    const [isWhitelist, setIsWhitelist] = useState(false);
 
     const getServers = () => {
         api.get(`/servidores/painel/${id}`).then((res) => {
             setFormData(res.data)
+            setIsXboxOnly(res.data.online_mode === 'true')
+            setIsWhitelist(res.data.allow_list === 'true')
         }).catch((err) => {
             setErros(err.response?.data || ['Erro ao conectar ao Servidor BackEnd Servidores']);
         }).finally(() => {
             setPronto(true)
         })
     }
-    const voltar = () => {render(<DetalheServidor id={id} container_id={container_id} render={render}/>, `Painel`)}
+    const voltar = () => {render(<Servidores render={render}/>, `Painel`)}
 
     useEffect(() => {
         getServers()
@@ -41,13 +45,14 @@ function EditaServidor({ id, container_id, render }) {
             difficulty: formRef.current.difficulty.value,
             gamemode: formRef.current.gamemode.value,
             default_player_permission_level: formRef.current.default_player_permission_level.value,
+            desempenho: formRef.current.desempenho.value,
             
             // Tratamento cirúrgico dos ENUMs do Sequelize ('true' ou 'false')
             cordenadas: String(formRef.current.cordenadas.checked),
             dias_jogados: String(formRef.current.dias_jogados.checked),
             force_gamemode: String(formRef.current.force_gamemode.checked),
-            online_mode: String(formRef.current.online_mode.checked),
-            allow_list: String(formRef.current.allow_list.checked),
+            online_mode: String(isXboxOnly),
+            allow_list: String(isWhitelist),
             texturepack_required: String(formRef.current.texturepack_required.checked),
             allow_cheats: String(formRef.current.allow_cheats.checked),
         };
@@ -111,6 +116,13 @@ function EditaServidor({ id, container_id, render }) {
                         <option value="adventure">Aventura</option>
                     </select>
 
+                    <label>Desempenho:</label>
+                    <select name="desempenho" defaultValue={formData.desempenho}>
+                        <option value="leve">Leve</option>
+                        <option value="medio">Médio</option>
+                        <option value="alto">Alto</option>
+                    </select>
+
                     <label>Nível de Permissão:</label>
                     <select name="default_player_permission_level" defaultValue={formData.default_player_permission_level}>
                         <option value="visitor">Visitante</option>
@@ -132,13 +144,32 @@ function EditaServidor({ id, container_id, render }) {
                             Forçar Modo de Jogo
                         </label>
                         <label>
-                            <input type="checkbox" name="online_mode" defaultChecked={formData.online_mode === 'true'} />
+                            <input 
+                                type="checkbox" 
+                                name="online_mode" 
+                                checked={isXboxOnly} 
+                                onChange={(e) => { 
+                                    const marcado = e.target.checked; 
+                                    setIsXboxOnly(marcado); 
+                                    if (!marcado) { setIsWhitelist(false); }
+                                }}
+                            />
                             Apenas Contas Xbox
                         </label>
                         <label>
-                            <input type="checkbox" name="allow_list" defaultChecked={formData.allow_list === 'true'} />
+                            <input 
+                                type="checkbox" 
+                                name="allow_list" 
+                                checked={isWhitelist} 
+                                onChange={(e) => { 
+                                    const marcado = e.target.checked; 
+                                    setIsWhitelist(marcado); 
+                                    if (marcado) { setIsXboxOnly(true); }
+                                }}
+                            />
                             Ativar Whitelist 
                         </label>
+
                         <label>
                             <input type="checkbox" name="texturepack_required" defaultChecked={formData.texturepack_required === 'true'} />
                             Pacotes de Textura

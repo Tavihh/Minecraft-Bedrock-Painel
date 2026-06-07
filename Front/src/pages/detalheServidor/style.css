@@ -28,6 +28,12 @@
         display: flex;
         gap: 10px;
         align-items: center;
+
+        & .titulo-status {
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+        }
     }
     & .btn-acoes {
         display: flex;

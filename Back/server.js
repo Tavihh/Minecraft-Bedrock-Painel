@@ -18,7 +18,6 @@ const Servidores = require('./src/routes/Servidores')
 const Jogadores = require('./src/routes/Jogadores')
 const Console = require('./src/routes/Console')
 
-app.use('/Public', express.static(path.join(__dirname, '/src/Public')))
 app.use('/Maps', express.static(path.join(__dirname, '/src/Maps')))
 require('./src/config/Db')
 
@@ -26,6 +25,8 @@ require('./src/config/Db')
 app.use('/servidores', dockerStatus, Servidores)
 app.use('/jogadores', dockerStatus, Jogadores)
 app.use('/console', dockerStatus, Console)
+
+app.use('/', express.static(path.join(__dirname, '/src/Public')))
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/src/Public/index.html'))

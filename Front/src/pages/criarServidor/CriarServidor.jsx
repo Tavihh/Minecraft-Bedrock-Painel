@@ -7,7 +7,7 @@ function CriarServidor() {
         // Configurações e Identificadores do Painel
         nome: null, 
         descricao: null, 
-        server_port: '19132', // Antiga porta_host (como string, conforme seu Model)
+        server_port: '19132', // Antiga server_port (como string, conforme seu Model)
         desempenho: 'medio', // leve, medio, alto
 
         // Propriedades Internas do Minecraft (server.properties)
@@ -37,6 +37,8 @@ function CriarServidor() {
     const [arquivo, setArquivo] = useState(null)
     const [versoes, setVersoes] = useState([])
     const formRef = useRef(null)
+    const [isXboxOnly, setIsXboxOnly] = useState(false);
+    const [isWhitelist, setIsWhitelist] = useState(false);
 
     const getVersoes = () => {
         api.get('/servidores/versoes').then((res) => {
@@ -69,11 +71,14 @@ function CriarServidor() {
         setSuccess([])
 
         const data = new FormData(formRef.current)
-        data.set('allow_cheats', formRef.current.allow_cheats.checked)
-        data.set('cordenadas', formRef.current.cordenadas.checked)
-        data.set('dias_jogados', formRef.current.dias_jogados.checked)
-        data.set('force_gamemode', formRef.current.force_gamemode.checked)
-
+        data.set('allow_cheats', String(formRef.current.allow_cheats.checked))
+        data.set('cordenadas', String(formRef.current.cordenadas.checked))
+        data.set('dias_jogados', String(formRef.current.dias_jogados.checked))
+        data.set('force_gamemode', String(formRef.current.force_gamemode.checked))
+        data.set('texturepack_required', String(formRef.current.texturepack_required.checked))
+        data.set('online_mode', String(isXboxOnly))
+        data.set('allow_list', String(isWhitelist))
+        
         api.post('/servidores/criar', data, {
             headers: { 'Content-Type': 'multipart/form-data' }
         }).then((res) => {
@@ -122,7 +127,7 @@ function CriarServidor() {
 
                 <label>Versão:</label>
                 <select name="version" id="version" defaultValue={formData.version} required>
-                    <option value="latest">Latest</option>
+                    <option value="LATEST">Latest</option>
                     {versoes.length > 0 ? versoes.map((v, i) => (
                         <option value={v} key={i}>{v}</option>
                     )) : ''}
@@ -178,13 +183,29 @@ function CriarServidor() {
                         Forçar Modo de Jogo
                     </label>
                     <label>
-                        <input type="checkbox" name="online_mode" defaultChecked={formData.online_mode === 'true'} />
-                        Apenas Contas Xbox
+                        <input 
+                            type="checkbox" 
+                            name="online_mode" 
+                            checked={isXboxOnly} 
+                            onChange={(e) => { 
+                                const marcado = e.target.checked; 
+                                setIsXboxOnly(marcado); 
+                                if (!marcado) { setIsWhitelist(false); }
+                            }}
+                        /> Apenas Contas Xbox
                     </label>
-                    <label>
-                        <input type="checkbox" name="allow_list" defaultChecked={formData.allow_list === 'true'} />
-                        Ativar Whitelist 
-                    </label>
+                    <label >
+                        <input 
+                            type="checkbox" 
+                            name="allow_list" 
+                            checked={isWhitelist} 
+                            onChange={(e) => { 
+                                const marcado = e.target.checked; 
+                                setIsWhitelist(marcado); 
+                                if (marcado) { setIsXboxOnly(true); }
+                            }}
+                        /> Ativar Whitelist 
+                        </label>
                     <label>
                         <input type="checkbox" name="texturepack_required" defaultChecked={formData.texturepack_required === 'true'} />
                         Pacotes de Textura

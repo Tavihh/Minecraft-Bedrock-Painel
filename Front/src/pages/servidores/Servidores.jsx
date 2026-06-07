@@ -7,10 +7,28 @@ function Servidores({render}) {
     const [servidores, setServidores] = useState([])
     const [erros, setErros] = useState([])
     const [pronto, setPronto] = useState(false)
+    const getStatus = (listaServidores) => {
+        listaServidores.forEach(sv => {
+            api.get(`/servidores/estaOn/${sv.id}`)
+                .then((res) => {
+                    // Atualiza dinamicamente apenas o servidor que respondeu
+                    setServidores(prev => prev.map(item => 
+                        item.id === sv.id ? { ...item, status: res.data.status } : item
+                    ));
+                })
+                .catch((err) => {
+                    setErros(err.response?.data || ['Erro ao atualizar status'])
+                    setTimeout(() => { setErros([]) }, 10000)
+                })
+        })
+    }
 
     const getServers = () => {
         api.get('/servidores/listar').then((res)=> {
             setServidores(res.data)
+            if (res.data && res.data.length > 0) {
+                getStatus(res.data)
+            }
             setErros([])
         }).catch((err) => {
             setErros(err.response?.data || ['Erro ao conectar ao Servidor BackEnd']);
@@ -22,7 +40,7 @@ function Servidores({render}) {
 
     useEffect(() => {
         getServers()
-        const i = setInterval(() => {getServers()}, 3000);
+        const i = setInterval(() => {getServers()}, 5000);
         return () => {clearInterval(i);}
     }, [])
 
@@ -64,7 +82,7 @@ function Servidores({render}) {
                     {/* 2. Porta de Conexão */}
                     <div className="list-col-info">
                         <span className="info-label">Porta:</span>
-                        <span className="info-value font-mono">{sv.porta_host || 19132}</span>
+                        <span className="info-value font-mono">{sv.server_port || 19132}</span>
                     </div>
 
                     {/* 3. Badge de Status Semitransparente */}

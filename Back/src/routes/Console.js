@@ -18,27 +18,34 @@ router.post('/comando/:container_id', async (req, res) => {
     }
     let erros = []
     try {
-        // const  { container_id } = validacao.data
-        const  { container_id } = req.params
+        const { container_id } = req.params
         const comando = req.body.comando
         if (!comando || typeof comando !== 'string' || comando.trim() === '') {
             erros.push('Comando não pode ser vazio')
             return res.status(400).json(erros)
         }
+
         const container = docker.getContainer(container_id)
         const inspecao = await container.inspect()
         if(!inspecao.State.Running) {
             erros.push('O servidor precisa estar ligado para executar comandos')
             return res.status(400).json(erros)
         }
+
+        // Remove a barra '/' caso o usuário digite (/op jogador)
         const comandoFormatado = comando.trim().replace(/^\//, '');
+
+        // 🚀 A SOLUÇÃO COMPROVADA: Chama o utilitário interno do container do itzg
         const exec = await container.exec({
-            Cmd: ['sh', '-c', `echo "${comandoFormatado}" > /proc/1/fd/0`],
+            Cmd: ['mc-send-to-console', comandoFormatado],
             AttachStdin: false,
-            AttachStdout: false,
-            AttachStderr: false
+            AttachStdout: true,  // Deixe true para capturar se o docker reclamar de algo
+            AttachStderr: true
         });
+
+        // Executa o comando em background dentro do container
         await exec.start({ detach: true });
+
         return res.status(200).json(['Comando Executado!'])
     } catch (err) {
         erros.push('Não foi possivel executar o comando')
