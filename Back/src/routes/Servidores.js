@@ -367,8 +367,7 @@ router.delete('/deletar/:id', async (req, res) => {
 router.put('/editar/:id', async (req, res) => {
     const { 
         nome, 
-        descricao, 
-        server_port,
+        descricao,
 
         // Desativa Conquistas
         allow_cheats, //allow-cheats (true) false
