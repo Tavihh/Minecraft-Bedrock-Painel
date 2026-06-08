@@ -39,6 +39,7 @@ function EditaServidor({ id, container_id, render }) {
         const payload = {
             nome: formRef.current.nome.value,
             descricao: formRef.current.descricao.value,
+            server_port: formRef.current.server_port.value,
             max_players: formRef.current.max_players.value,
             player_idle_timeout: formRef.current.player_idle_timeout.value,
             server_name: formRef.current.server_name.value,
@@ -91,6 +92,9 @@ function EditaServidor({ id, container_id, render }) {
                 
                     <label htmlFor="descricao">Descrição: </label>
                     <textarea name="descricao" defaultValue={formData.descricao} placeholder="Descrição do Servidor (Opcional)"/>
+
+                    <label htmlFor="server_port">Porta: </label>
+                    <input type="number" name="server_port" defaultValue={formData.server_port} required placeholder="Porta do Host (Ex: 19132)"/>
                 
                     <label htmlFor="max_players">Max Jogadores: </label>
                     <input type="number" name="max_players" defaultValue={formData.max_players} placeholder="Máximo de Players"/>

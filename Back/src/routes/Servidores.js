@@ -368,6 +368,7 @@ router.put('/editar/:id', async (req, res) => {
     const { 
         nome, 
         descricao, 
+        server_port,
 
         // Desativa Conquistas
         allow_cheats, //allow-cheats (true) false
@@ -414,6 +415,7 @@ router.put('/editar/:id', async (req, res) => {
             // Configuracoes
             nome: String(nome),
             descricao: String(descricao),
+            server_port: String(server_port),
             // desativa conquistas
             allow_cheats: String(allow_cheats),
             gamemode: String(gamemode),
